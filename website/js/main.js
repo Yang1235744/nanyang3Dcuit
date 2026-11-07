@@ -187,15 +187,17 @@
   $('#model-provider').addEventListener('change', syncProviderFields);
 
   async function run3D(overrides) {
-    const file = pickImage('model', 'ref', 'front');
+    const file = pickImage('modelFront', 'model', 'ref', 'front');
     if (!file) {
-      setLog($('#model-log'), '[失败] 请先上传人物图片');
+      setLog($('#model-log'), '[失败] 请先上传正面图片');
       return null;
     }
     const o = Object.assign({}, overrides || {});
     const provider = (o.provider && String(o.provider).trim()) || $('#model-provider').value;
     const opts = {
       file,
+      back: state.files.modelBack || null,
+      side: state.files.modelSide || null,
       provider,
       space: $('#model-space').value.trim() || NY.config.data.space,
       apiName: $('#model-api').value.trim() || '/generation_all',
@@ -214,7 +216,7 @@
     setLog($('#model-log'), isLocal ? '[提示] 本地生成中：只读像素、不联网、不加载权重…' : '[提示] 正在请求远端服务…');
     try {
       const res = isLocal
-        ? await NY.mesh3d.build(file, { onLog: opts.onLog })
+        ? await NY.mesh3d.build({ front: file, back: opts.back, side: opts.side }, { onLog: opts.onLog })
         : await NY.model3d.run(opts);
       state.glbBlob = res.blob;
       if (state.glbUrl) URL.revokeObjectURL(state.glbUrl);

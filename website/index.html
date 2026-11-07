@@ -153,15 +153,30 @@
       <div class="card">
         <h2>单图 → GLB</h2>
         <p class="muted small">
-          默认本地生成：只读图片像素，构造带内嵌贴图的 GLB 网格，不联网、不加载权重。
-          需要照片级重建时，把后端切到 Hugging Face Space 或自己的 REST 服务。
+          本地实体雕刻：自动抠背景 → 剪影体素雕刻 → 封闭网格（有厚度，能任意角度旋转），
+          不联网、不加载权重。只给正面图时，侧面厚度和背面由剪影充气估算；
+          补上背面 / 侧面图就是这三视图围出来的真实外形。
         </p>
-        <label class="drop drop-wide" data-drop="model">
-          <input type="file" accept="image/*" hidden>
-          <span class="drop-title">人物图片</span>
-          <span class="drop-hint">点击或拖入，建议单人、正面、干净背景</span>
-          <img class="thumb" alt="">
-        </label>
+        <div class="drop-grid">
+          <label class="drop" data-drop="modelFront">
+            <input type="file" accept="image/*" hidden>
+            <span class="drop-title">正面 <b>必填</b></span>
+            <span class="drop-hint">点击或拖入</span>
+            <img class="thumb" alt="">
+          </label>
+          <label class="drop" data-drop="modelBack">
+            <input type="file" accept="image/*" hidden>
+            <span class="drop-title">背面</span>
+            <span class="drop-hint">可选，决定后壳形状</span>
+            <img class="thumb" alt="">
+          </label>
+          <label class="drop" data-drop="modelSide">
+            <input type="file" accept="image/*" hidden>
+            <span class="drop-title">侧面（朝右）</span>
+            <span class="drop-hint">可选，决定厚度轮廓</span>
+            <img class="thumb" alt="">
+          </label>
+        </div>
 
         <div class="fields">
           <label class="field">
@@ -174,7 +189,7 @@
           </label>
           <label class="field" data-provider="local">
             <span>本地方案</span>
-            <input type="text" value="浮雕网格 · 贴图内嵌 · 不联网" disabled>
+            <input type="text" value="实体雕刻 · 三视图贴图 · 不联网" disabled>
           </label>
           <label class="field" data-provider="gradio">
             <span>Space</span>
