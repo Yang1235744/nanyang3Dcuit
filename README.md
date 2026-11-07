@@ -92,7 +92,18 @@ python pipeline/img23d.py --image hero.png --out hero.glb \
 
 部署到 GitHub Pages：仓库推送后 workflow 自动发布 `website` 目录。
 
-## 四、建仓库并拉取
+## 四、桌面版（Windows EXE）
+
+直接下载：[Nanyang3Dcuit.exe](https://github.com/Yang1235744/nanyang3Dcuit/releases/latest)（48.6 MB，免安装）
+
+- 深色界面，左侧会话列表 + 右侧对话，SSE 流式输出，可随时停止；
+- 设置里选供应商（DeepSeek / Kimi / OpenAI / 自定义），填自己的 API Key，点「测试连接」；
+- Key 存在 `%APPDATA%\Nanyang3Dcuit\config.json`，不随仓库分发；
+- 从源码自己打包：`powershell -ExecutionPolicy Bypass -File desktop/build.ps1`
+
+第一次打开先填 Key，否则只能看到界面。
+
+## 五、建仓库并拉取
 
 ```bash
 cd nanyang-3dcuit
