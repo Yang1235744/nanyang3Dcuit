@@ -11,6 +11,7 @@
 <script src="js/config.js" defer></script>
 <script src="js/sprite.js" defer></script>
 <script src="js/model3d.js" defer></script>
+<script src="js/mesh3d.js" defer></script>
 <script src="js/agent.js" defer></script>
 <script src="js/main.js" defer></script>
 </head>
@@ -166,9 +167,14 @@
           <label class="field">
             <span>后端</span>
             <select id="model-provider">
+              <option value="local" selected>本地生成（无需服务器）</option>
               <option value="gradio">Gradio Space</option>
               <option value="rest">REST 接口</option>
             </select>
+          </label>
+          <label class="field" data-provider="local">
+            <span>本地方案</span>
+            <input type="text" value="浮雕网格 · 贴图内嵌 · 不联网" disabled>
           </label>
           <label class="field" data-provider="gradio">
             <span>Space</span>

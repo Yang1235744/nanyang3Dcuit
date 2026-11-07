@@ -6,7 +6,7 @@
     '1. 用中文回答，简短，先给结论，不要长篇解释。',
     '2. 需要执行动作时，在回复最后追加一个 ```json 代码块，里面只有一个 JSON 对象，action 取值：',
     '   - "sprite_sheet"：把当前参考图做成 RPG Maker 行走图，可选 frame("32x48"|"48x48"|"32x32")、height_ratio(0.5-1)、colors(0-48)',
-    '   - "model_3d"：把当前参考图转成 GLB 3D 角色，可选 provider("gradio"|"rest")、space、api_name',
+    '   - "model_3d"：把当前参考图转成 GLB 3D 角色，可选 provider("local"|"gradio"|"rest")、space、api_name',
     '   - "download"：把已生成的产物打包成 ZIP',
     '   - "none"：纯对话，不执行',
     '3. 不要谎称文件已经生成，只输出指令，前端会真正执行并把结果回给你。',
@@ -96,7 +96,7 @@
     }
     if (/3d|三维|建模|模型|glb|立体/i.test(text)) {
       return {
-        display: '收到，走 3D 管线：把这张图交给远端重建服务，输出 GLB。本机不加载权重。',
+        display: '收到，走本地 3D 管线：直接从这张图生成 GLB 浮雕模型，不联网、不加载权重。',
         plan: { action: 'model_3d' },
       };
     }

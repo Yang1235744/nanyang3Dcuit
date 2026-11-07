@@ -193,7 +193,7 @@
       return null;
     }
     const o = Object.assign({}, overrides || {});
-    const provider = o.provider || $('#model-provider').value;
+    const provider = (o.provider && String(o.provider).trim()) || $('#model-provider').value;
     const opts = {
       file,
       provider,
@@ -210,9 +210,12 @@
       return null;
     }
 
-    setLog($('#model-log'), '[提示] 正在请求远端服务…');
+    const isLocal = provider === 'local';
+    setLog($('#model-log'), isLocal ? '[提示] 本地生成中：只读像素、不联网、不加载权重…' : '[提示] 正在请求远端服务…');
     try {
-      const res = await NY.model3d.run(opts);
+      const res = isLocal
+        ? await NY.mesh3d.build(file, { onLog: opts.onLog })
+        : await NY.model3d.run(opts);
       state.glbBlob = res.blob;
       if (state.glbUrl) URL.revokeObjectURL(state.glbUrl);
       state.glbUrl = URL.createObjectURL(res.blob);
