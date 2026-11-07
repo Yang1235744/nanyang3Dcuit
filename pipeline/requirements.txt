@@ -1,0 +1,5 @@
+# 2D 行走图管线：纯 CPU，零显存
+Pillow>=10.0
+
+# 3D 管线（可选）：只在调用 Hugging Face Space 时需要
+# gradio_client>=1.0

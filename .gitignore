@@ -1,0 +1,29 @@
+# 交付物（可下载产物）不入库
+out/
+dist/
+exports/
+deliverables/
+*.glb
+*.gltf
+*.ply
+*.obj
+*.stl
+
+# 本地配置与凭据
+pipeline/config.json
+.env
+*.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

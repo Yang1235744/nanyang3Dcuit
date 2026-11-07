@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nanyang3Dcuit · 图片变角色</title>
+<meta name="description" content="nanyang3Dcuit：图片转 RPG Maker 行走图 / 3D 角色，纯前端，零显存。">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script src="js/config.js" defer></script>
+<script src="js/sprite.js" defer></script>
+<script src="js/model3d.js" defer></script>
+<script src="js/agent.js" defer></script>
+<script src="js/main.js" defer></script>
+</head>
+<body>
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="glow glow-a" aria-hidden="true"></div>
+<div class="glow glow-b" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">3D</div>
+    <div class="brand-text">
+      <h1>nanyang<span>3Dcuit</span></h1>
+      <p>图片 → 2D 行走图 / 3D 角色 · 本机不跑大模型</p>
+    </div>
+  </div>
+  <div class="chips">
+    <span class="chip" id="chip-engine">纯前端 · 零显存</span>
+    <span class="chip chip-dim" id="chip-agent">代理：本地规则</span>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" data-panel="agent" role="tab">对话创作</button>
+  <button class="tab" data-panel="sprite" role="tab">2D 行走图</button>
+  <button class="tab" data-panel="model" role="tab">3D 角色</button>
+  <button class="tab" data-panel="settings" role="tab">设置</button>
+</nav>
+
+<main>
+  <!-- 对话创作 -->
+  <section class="panel active" id="panel-agent">
+    <div class="chat-shell">
+      <div class="chat-head">
+        <span class="dot"></span>
+        <span>创作代理</span>
+        <span class="chat-hint">描述你想要的角色，代理会调用对应管线</span>
+      </div>
+      <div class="chat-log" id="chat-log">
+        <div class="msg msg-bot">
+          <div class="msg-role">代理</div>
+          <div class="msg-body">
+            我是 nanyang3Dcuit 的创作代理。<br>
+            先上传一张人物图片，然后跟我说「做成行走图」或「生成 3D 角色」，我会直接跑管线并把文件交给你下载。<br>
+            <span class="muted">没配 API Key 也能用，我会按关键词走本地规则。</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-ref">
+        <label class="drop drop-inline" data-drop="ref">
+          <input type="file" accept="image/*" hidden>
+          <span class="drop-title">参考图</span>
+          <span class="drop-hint">点击或拖入</span>
+          <img class="thumb" alt="">
+        </label>
+        <div class="quick" id="quick-actions">
+          <button data-say="把这张图做成 RPG Maker 行走图，32x48">做行走图</button>
+          <button data-say="把这张图生成 3D 角色模型">生成 3D</button>
+          <button data-say="把已生成的文件打包，我要下载">打包下载</button>
+        </div>
+      </div>
+      <div class="composer">
+        <textarea id="chat-input" rows="2" placeholder="例如：做一个蓝发剑士，先行走图再 3D 模型。Enter 发送，Shift+Enter 换行"></textarea>
+        <button class="btn btn-primary" id="chat-send">发送</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2D 行走图 -->
+  <section class="panel" id="panel-sprite">
+    <div class="panel-grid">
+      <div class="card">
+        <h2>参考图</h2>
+        <p class="muted small">推荐纯洋红 #FF00FF 背景；只有正面也能出图，缺背面 / 侧面会用镜像占位。</p>
+        <div class="drop-grid">
+          <label class="drop" data-drop="front">
+            <input type="file" accept="image/*" hidden>
+            <span class="drop-title">正面 <b>必填</b></span>
+            <span class="drop-hint">点击或拖入图片</span>
+            <img class="thumb" alt="">
+          </label>
+          <label class="drop" data-drop="back">
+            <input type="file" accept="image/*" hidden>
+            <span class="drop-title">背面</span>
+            <span class="drop-hint">可选</span>
+            <img class="thumb" alt="">
+          </label>
+          <label class="drop" data-drop="side">
+            <input type="file" accept="image/*" hidden>
+            <span class="drop-title">侧面（朝右）</span>
+            <span class="drop-hint">可选</span>
+            <img class="thumb" alt="">
+          </label>
+        </div>
+
+        <div class="fields">
+          <label class="field">
+            <span>帧尺寸</span>
+            <select id="sprite-frame">
+              <option value="32x48">VX / VX Ace · 32×48</option>
+              <option value="48x48">MV / MZ · 48×48</option>
+              <option value="32x32">XP · 32×32</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>占帧高 <em id="lbl-ratio">0.92</em></span>
+            <input type="range" id="sprite-ratio" min="0.5" max="1" step="0.01" value="0.92">
+          </label>
+          <label class="field">
+            <span>压色板（0=关）</span>
+            <input type="number" id="sprite-colors" min="0" max="48" step="1" value="0">
+          </label>
+          <label class="field field-check">
+            <input type="checkbox" id="sprite-keep-corner">
+            <span>保留右下角（默认清 AI 水印区）</span>
+          </label>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn btn-primary" id="sprite-build">生成行走图</button>
+          <button class="btn" id="sprite-download" disabled>下载 PNG</button>
+        </div>
+        <div class="log" id="sprite-log">等待生成…</div>
+      </div>
+
+      <div class="card card-preview">
+        <h2>预览</h2>
+        <p class="muted small" id="sprite-meta">3 帧 × 4 方向（下 / 左 / 右 / 上），棋盘格表示透明区。</p>
+        <div class="canvas-wrap">
+          <canvas id="sprite-preview" width="768" height="640"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3D 角色 -->
+  <section class="panel" id="panel-model">
+    <div class="panel-grid">
+      <div class="card">
+        <h2>单图 → GLB</h2>
+        <p class="muted small">
+          本机不加载权重。请求会转发到 Hugging Face Space 或你自己的服务端；
+          浏览器直连 Space 可能被 CORS 拦，报错时换 REST 地址最稳。
+        </p>
+        <label class="drop drop-wide" data-drop="model">
+          <input type="file" accept="image/*" hidden>
+          <span class="drop-title">人物图片</span>
+          <span class="drop-hint">点击或拖入，建议单人、正面、干净背景</span>
+          <img class="thumb" alt="">
+        </label>
+
+        <div class="fields">
+          <label class="field">
+            <span>后端</span>
+            <select id="model-provider">
+              <option value="gradio">Gradio Space</option>
+              <option value="rest">REST 接口</option>
+            </select>
+          </label>
+          <label class="field" data-provider="gradio">
+            <span>Space</span>
+            <input type="text" id="model-space" placeholder="tencent/Hunyuan3D-2">
+          </label>
+          <label class="field" data-provider="gradio">
+            <span>接口名</span>
+            <input type="text" id="model-api" placeholder="/generation_all">
+          </label>
+          <label class="field" data-provider="rest">
+            <span>接口地址</span>
+            <input type="text" id="model-url" placeholder="https://your-host/reconstruct">
+          </label>
+          <label class="field" data-provider="rest">
+            <span>上传字段 / Key</span>
+            <input type="text" id="model-field" placeholder="image">
+          </label>
+          <label class="field" data-provider="rest">
+            <span>Authorization Key（可选）</span>
+            <input type="password" id="model-key" placeholder="Bearer ...">
+          </label>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn btn-primary" id="model-run">生成 3D 角色</button>
+          <button class="btn" id="model-download" disabled>下载 GLB</button>
+          <button class="btn" id="model-zip" disabled>打包下载 ZIP</button>
+        </div>
+        <p class="muted small repo-line">
+          源码与模型拉取：<a id="repo-inline" href="https://github.com/Yang1235744/nanyang3Dcuit" target="_blank" rel="noopener">GitHub 仓库</a>
+        </p>
+        <div class="log" id="model-log">等待生成…</div>
+      </div>
+
+      <div class="card card-preview">
+        <h2>模型预览</h2>
+        <div class="viewer-wrap">
+          <model-viewer id="viewer" camera-controls auto-rotate shadow-intensity="0.8"
+            exposure="1" environment-image="neutral" alt="3D 角色预览"></model-viewer>
+          <p class="muted small" id="viewer-hint">生成后在这里旋转查看。若组件没加载（离线 / 网络受限），仍可直接下载 GLB。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 设置 -->
+  <section class="panel" id="panel-settings">
+    <div class="card card-narrow">
+      <h2>创作代理（OpenAI 兼容）</h2>
+      <p class="muted small">留空则使用本地关键词规则，不联网也能用。Key 只存本机 localStorage，不会提交到仓库。</p>
+      <div class="fields fields-1">
+        <label class="field">
+          <span>Base URL</span>
+          <input type="text" id="cfg-base" placeholder="https://api.openai.com/v1">
+        </label>
+        <label class="field">
+          <span>API Key</span>
+          <input type="password" id="cfg-key" placeholder="sk-...">
+        </label>
+        <label class="field">
+          <span>模型名</span>
+          <input type="text" id="cfg-model" placeholder="gpt-4o-mini">
+        </label>
+      </div>
+      <h2 class="mt">3D 服务默认值</h2>
+      <div class="fields fields-1">
+        <label class="field">
+          <span>默认 Space</span>
+          <input type="text" id="cfg-space" placeholder="tencent/Hunyuan3D-2">
+        </label>
+        <label class="field">
+          <span>默认 REST 地址</span>
+          <input type="text" id="cfg-rest" placeholder="https://your-host/reconstruct">
+        </label>
+      </div>
+      <h2 class="mt">仓库与拉取</h2>
+      <p class="muted small">网页端、2D 管线、3D 管线都在同一个仓库；别人 clone 或下载 ZIP 就能跑。</p>
+      <div class="fields fields-1">
+        <label class="field">
+          <span>GitHub 仓库地址</span>
+          <input type="text" id="cfg-repo" placeholder="https://github.com/Yang1235744/nanyang3Dcuit">
+        </label>
+      </div>
+      <div class="row-actions">
+        <button class="btn" id="repo-copy">复制 git clone</button>
+        <a class="btn" id="repo-zip" href="https://github.com/Yang1235744/nanyang3Dcuit/archive/refs/heads/main.zip" target="_blank" rel="noopener">下载仓库 ZIP</a>
+        <a class="btn" id="repo-open" href="https://github.com/Yang1235744/nanyang3Dcuit" target="_blank" rel="noopener">打开 GitHub</a>
+      </div>
+      <div class="row-actions">
+        <button class="btn btn-primary" id="cfg-save">保存设置</button>
+        <button class="btn" id="cfg-clear">清除本机数据</button>
+      </div>
+      <div class="log" id="cfg-log">设置保存在浏览器，换设备需重填。</div>
+    </div>
+  </section>
+</main>
+
+<footer class="dock">
+  <div class="dock-left">
+    <span class="dock-title">产物</span>
+    <div class="asset-list" id="asset-list">
+      <span class="muted small">还没有生成文件</span>
+    </div>
+  </div>
+  <div class="dock-right">
+    <button class="btn" id="dock-clear">清空</button>
+    <button class="btn btn-primary" id="dock-zip">打包下载 ZIP</button>
+  </div>
+</footer>
+</body>
+</html>

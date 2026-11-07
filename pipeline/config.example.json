@@ -1,0 +1,24 @@
+{
+  "_说明": "复制为 config.json 后填写。本机不加载 3D 权重，只填远端服务地址。",
+  "sprite2d": {
+    "frame": "vx",
+    "height_ratio": 0.92,
+    "tol": 26,
+    "colors": 0,
+    "keep_corner": false
+  },
+  "model3d": {
+    "provider": "gradio",
+    "space": "tencent/Hunyuan3D-2",
+    "api_name": "/generation_all",
+    "url": "",
+    "field": "image",
+    "api_key": "",
+    "timeout": 300
+  },
+  "agent": {
+    "base_url": "https://api.openai.com/v1",
+    "api_key": "",
+    "model": "gpt-4o-mini"
+  }
+}
