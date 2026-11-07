@@ -5,10 +5,10 @@
 | 能力 | 输入 | 输出 | 算力 |
 | --- | --- | --- | --- |
 | 2D 行走图 | 角色立绘（正面 / 背面 / 侧面） | RPG Maker VX 可用的 96×192 行走图 | 纯 CPU，零显存 |
-| 3D 角色 | 单张人物图片 | `.glb` 模型 | 转远端托管推理，本机不载权重 |
+| 3D 角色 | 单张人物图片 | `.glb` 模型 | 浏览器本地生成（默认）/ 远端重建（可选） |
 | 网页 AI 代理 | 一句自然语言需求 | 生成素材 + 打包下载 | 走 OpenAI 兼容接口（可选 LLM）|
 
-设计原则很明确：**本机不跑大模型**。3D 重建交给 Hugging Face Space 或你自己的服务端，2D 只用 Pillow 做像素级处理，所以核显、老笔记本都能用。
+设计原则很明确：**本机不跑大模型**。3D 默认在浏览器本地把像素构造成带内嵌贴图的 GLB 网格，不联网、不载权重；需要照片级重建时再切到 Hugging Face Space 或自己的服务端。2D 只用 Pillow 做像素级处理，所以核显、老笔记本都能用。
 
 ## 目录结构
 
@@ -87,7 +87,7 @@ python pipeline/img23d.py --image hero.png --out hero.glb \
 
 - **对话创作**：填 OpenAI 兼容的 baseURL / apiKey / model（存 localStorage），AI 会输出结构化指令，前端解析后自动调用 2D 或 3D 管线；
 - **2D 行走图**：在 Canvas 里完整复刻 `sprite2d.py` 的抠图、包围盒、拼图逻辑，浏览器本地完成，图片不上传；
-- **3D 角色**：填 Gradio Space 或 REST 地址，页面直接请求远端服务；
+- **3D 角色**：默认本地生成 GLB（不联网、无需服务器）；也可切到 Gradio Space 或 REST 地址走远端重建；
 - **打包下载**：JSZip 打包 PNG / GLB / manifest.json / 导入说明。
 
 部署到 GitHub Pages：仓库推送后 workflow 自动发布 `website` 目录。
@@ -125,6 +125,6 @@ git clone https://github.com/<你的用户名>/nanyang3Dcuit.git
 
 ## 注意
 
-- 3D 需要联网调用远端服务，本机不下载 1.5TB 级权重；
+- 3D 默认本地生成，本机不下载 1.5TB 级权重；远端重建为可选项；
 - 生成的 `.glb` 已加入 `.gitignore`，产物走网页下载或 Release，不塞进仓库历史；
 - API Key 只存浏览器 localStorage，不会提交到仓库。

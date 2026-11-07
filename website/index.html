@@ -153,8 +153,8 @@
       <div class="card">
         <h2>单图 → GLB</h2>
         <p class="muted small">
-          本机不加载权重。请求会转发到 Hugging Face Space 或你自己的服务端；
-          浏览器直连 Space 可能被 CORS 拦，报错时换 REST 地址最稳。
+          默认本地生成：只读图片像素，构造带内嵌贴图的 GLB 网格，不联网、不加载权重。
+          需要照片级重建时，把后端切到 Hugging Face Space 或自己的 REST 服务。
         </p>
         <label class="drop drop-wide" data-drop="model">
           <input type="file" accept="image/*" hidden>
