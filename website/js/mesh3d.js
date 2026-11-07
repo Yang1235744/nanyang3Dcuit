@@ -56,7 +56,7 @@
 
     function addView(typedArray, target) {
       const bytes = new Uint8Array(typedArray.buffer, typedArray.byteOffset, typedArray.byteLength);
-      const view = { byteOffset: offset, byteLength: typedArray.byteLength };
+      const view = { buffer: 0, byteOffset: offset, byteLength: typedArray.byteLength };
       if (target) view.target = target;
       views.push(view);
       parts.push(bytes);
